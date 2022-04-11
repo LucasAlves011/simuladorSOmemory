@@ -1,11 +1,12 @@
 import java.util.Random;
 import java.text.DecimalFormat;
 
-
 public class Main {
     public static final int MEMORY_SIZE = 160;
     public static final int MEMORY_SIZE2 = 45;
     public static boolean REALOC = true;
+    public static boolean SWAP = true;
+    public static char[] swap = new char[MEMORY_SIZE];
     public static DecimalFormat df = new DecimalFormat("#,###.00");
 
     public static Cores[] cores = new Cores[]{Cores.PRETO, Cores.VERMELHO, Cores.VERDE,
@@ -13,8 +14,8 @@ public class Main {
     public static int colorGetIndex = 0;
 
     public static void main(String[] args) {
-        df.format(1234.36);
         char[] memoria = new char[MEMORY_SIZE];
+       
 
         char[] memoria1 = new char[MEMORY_SIZE2];
         char[] memoria2 = new char[MEMORY_SIZE2];
@@ -24,6 +25,7 @@ public class Main {
 
         for (int i = 0; i < MEMORY_SIZE; i++) {
             memoria[i] = '_';
+            swap[i] = '_';
         }
 
         for (int i = 0; i < MEMORY_SIZE2; i++) {
@@ -42,7 +44,7 @@ public class Main {
         var p5 = new Processo("Processo 5", 29);//E
         var p6 = new Processo("Processo 6", 7);//F
         var p7 = new Processo("Processo 7", 27);//G
-        var p8 = new Processo("Processo 8", 30);//H
+        var p8 = new Processo("Processo 8", 19);//H
 
         enfiar(memoria, 15, 44, '%');//usado apenas para teste
         enfiar(memoria, 74, 84, '#');//usado apenas para teste
@@ -89,10 +91,10 @@ public class Main {
         imprimir(memoria);
         alocar(memoria, p6);
 
-        imprimir(memoria);
-        alocar(memoria, p7);
-        imprimir(memoria);
-        alocar(memoria, p8);
+//        imprimir(memoria);
+//        alocar(memoria, p7);
+//        imprimir(memoria);
+//        alocar(memoria, p8);
 
         logMemory(memoria);
 
@@ -130,7 +132,12 @@ public class Main {
 //        imprimir(memoria2);
 //        compactacao(memoria2);
 //        imprimir(memoria2);
-
+       /* imprimir(memoria2);
+        desalocar(memoria2,swap);
+        imprimir(memoria2);
+        System.out.print("SWAP -> ");
+        imprimir(swap);
+*/
 
 //   4    compactacao(memoria);
 //        imprimir(memoria);
@@ -191,12 +198,22 @@ public class Main {
             while (verifyCompact(memoria)) {
                 compactacao(memoria);
             }
+
             if (REALOC) {
                 REALOC = false;
                 alocar(memoria, processo);
-            } else
-                System.err.println((char) processo.getId() + " não pode ser alocado na memória. Realizar Swap.");
-            //TODO FAZER SWAP AQUI
+            } else if (SWAP){
+                //SWAP
+                System.err.println((char) processo.getId() + " não pode ser alocado na memória. Realizando Swap : ");
+                desalocar(memoria,swap);
+//                REALOC = true;
+                SWAP = false;
+                alocar(memoria,processo);
+                imprimir(memoria);
+                System.out.print("Swap -->");
+                imprimir(swap);
+            }else
+                System.err.println("Swap realizado com sucesso, mas não houve memória suficiente mesmo retirando um processo da memória principal");
         }
     }
 
@@ -206,11 +223,10 @@ public class Main {
 
         if (memoria[memoria.length - 1] == '_') {
             for (int i = memoria.length - 1; i > 0; i--) {
-                if (memoria[i] != '_' && gate) {
+                if (memoria[i] != '_' && gate)
                     gate = false;
-                } else if (memoria[i] == '_' && !gate) {
+                else if (memoria[i] == '_' && !gate)
                     return true; // 3º
-                }
             }
             return false; // 4º
         } else {
@@ -237,95 +253,226 @@ public class Main {
     }
 
     public static void logMemory(char[] memoria) {
-        double livre = 0;
-        double ocupada = 0;
+        float livre = 0;
+        float ocupada = 0;
         for (char c : memoria) {
             if (c != '_')
                 ocupada++;
             else
                 livre++;
-            System.out.println();
-            System.out.print((int) ocupada + " unidades ocupadas" + "(" + (ocupada * 100 / memoria.length) + "%)");
-            System.out.print((int) livre + " unidades livres" + "(" + (livre * 100 / memoria.length) + "%)");
-            //@TODO ajeitar esses arredondamentos
-
         }
+        System.out.println();
+        System.out.printf("\t\t\t\t\t\t\t\t" + (int) ocupada + " unidades ocupadas (%.2f%%)      ",(ocupada * 100 / MEMORY_SIZE)  );
+        System.out.printf( (int) livre + " unidades livres  (%.2f%%)",(livre * 100 / MEMORY_SIZE) );
+
     }
 
-        public static void desalocar ( char[] memoria, Processo processo){
-            Random random = new Random();
-            int number = random.nextInt(MEMORY_SIZE);
+    public static void desalocar ( char[] memoria,  char[] swap){
+        Random random = new Random();
+        char[] vetorAux;
+        int index = 0;
+        int number = random.nextInt(MEMORY_SIZE);
 
-            switch (memoria[number]) {
-                case '[':
-                    //vai pra esquerda
-                    break;
-                case ']':
-                    //vai pra direita
-                    break;
-                case ' ':
-                    //S
-                    break;
-                default:
-                    break;
-            }
+        int temp = 0;
+        int vFinal = 0;
+        int vInicio=0;
 
-        }
-
-        public static int firstFit ( char[] memoria, Processo processo){
-            boolean gate = true;
-            int index = 0;
-            for (int i = 0; i < memoria.length; i++) {
-                if (index >= processo.getTamanho() - 1 && !gate)
-                    return (i - index);
-                else if (memoria[i] == '_' && gate) {
-                    index++;
-                    gate = false;
-                } else if (memoria[i] == '_' && !gate)
-                    index++;
-                else if (memoria[i] != '_' && !gate) {
-                    index = 0;
-                    gate = true;
-                }
-            }
-            return -1; // Não tem um bloco grande o suficiente para alocar, tentar realizar compactação
-        }
-
-        public static void imprimir ( char[] memoria){
-            //TODO Concertar impressões de caracteres fora do array de memória
-            //TODO CONCERTAR ESSA PORRA DESSAS CORES
-            int swapColor = 0;
-            for (int i = 0; i < memoria.length; i++) {
-                if (memoria[i] != '_') {
-                    System.out.print(cores[(colorGetIndex)].getValor());
-                    while (memoria[i] != '_') {
-                        if (memoria[i] == '[' || memoria[i] == ']')
-                            swapColor++;
-                        if (swapColor >= 2) {
-//                        colorGetIndex++;
-                            incrementarColor();
-                            swapColor = 0;
-
-                        }
-                        System.out.print(memoria[i++]);
-                        System.out.print(cores[(colorGetIndex)].getValor());
+        switch (memoria[number]) {
+            case '[':
+                //acha
+                for (int i = number; i < memoria.length; i++) {
+                    if(memoria[i] == ']'){
+                        vFinal = i+1;
+                        temp = (i+1) - number;
+                        break;
                     }
-                    System.out.print(Cores.RESET.getValor());
-//                colorGetIndex++;
-                    incrementarColor();
-                } else
-                    System.out.print(memoria[i]);
+                }
+
+                vetorAux = new char[temp];
+                index = 0;
+
+                //copia memoria para aux e apaga memoria
+                for (int i = number; i < vFinal ; i++) {
+                    vetorAux[index++] = memoria[i];
+                    memoria[i] = '_';
+                }
+                index = 0;
+                try{
+                    int swapPosition = returnSwapPosition();
+                    if (swapPosition != -1)
+                        for (int i = 0; i < vetorAux.length; i++)
+                            swap[swapPosition++] = vetorAux[index++];
+                    else
+                        throw new ArrayIndexOutOfBoundsException();
+
+                }catch (ArrayIndexOutOfBoundsException e) {
+                       System.err.println("Aconteceu uma desgraça, até o swap ta cheio meu amigo COMPRE UMA MEMÓRIA" +
+                            "URGENTEMENTE PQ TA FODA PRA KRLLL");
+                }
+                break;
+
+
+            case ']':
+                for (int i = number; i >= 0; i--) {
+                    if (memoria[i] == '[') {
+                        vInicio = i  ;
+                        temp = (number- i)+1;
+                        break;
+                    }
+                }
+
+                vetorAux = new char[temp];
+                index = 0;
+                for (int i = number; i >= vInicio ; i--) {
+                    vetorAux[index++] = memoria[i];
+                    memoria[i] = '_';
+                }
+
+                index = 0;
+                try{
+                    int swapPosition = returnSwapPosition();
+                    if (swapPosition != -1)
+                        for (int i = 0; i < vetorAux.length; i++)
+                            swap[swapPosition++] = vetorAux[index++];
+                    else
+                        throw new ArrayIndexOutOfBoundsException();
+
+                }catch (ArrayIndexOutOfBoundsException e) {
+                    System.err.println("Aconteceu uma desgraça, até o swap ta cheio meu amigo COMPRE UMA MEMÓRIA" +
+                            "URGENTEMENTE PQ TA FODA PRA KRLLL");
+                }
+                break;
+
+
+            default:
+                // Aqui entra quando acha o meio do processo
+                int indexInicio = 0;
+                for (int i = number; i >= 0; i--) {
+                    if (memoria[i] == '[') {
+                        indexInicio = i;
+                        break;
+                    }
+                }
+
+                //cópia case 1
+                for (int i = indexInicio; i < memoria.length; i++) {
+                    if(memoria[i] == ']'){
+                        vFinal = i+1;
+                        temp = (i+1) - indexInicio;
+                        break;
+                    }
+                }
+
+                vetorAux = new char[temp];
+                index = 0;
+
+                //copia memoria para aux e apaga memoria
+                for (int i = indexInicio; i < vFinal ; i++) {
+                    vetorAux[index++] = memoria[i];
+                    memoria[i] = '_';
+                }
+                index = 0;
+                try{
+                    int swapPosition = returnSwapPosition();
+                    if (swapPosition != -1)
+                        for (int i = 0; i < vetorAux.length; i++)
+                            swap[swapPosition++] = vetorAux[index++];
+                    else
+                        throw new ArrayIndexOutOfBoundsException();
+
+                }catch (ArrayIndexOutOfBoundsException e) {
+                    System.err.println("Aconteceu uma desgraça, até o swap ta cheio meu amigo COMPRE UMA MEMÓRIA" +
+                            "URGENTEMENTE PQ TA FODA PRA KRLLL");
+                }
+                break;
+        }
+
+    }
+    
+    public static int returnSwapPosition(){
+        for (int i = 0; i < swap.length; i++) {
+            if (swap[i] == '_')
+                return i;
+        }
+        return -1;
+    }
+
+    public static int firstFit ( char[] memoria, Processo processo){
+        boolean gate = true;
+        int index = 0;
+        for (int i = 0; i < memoria.length; i++) {
+            if (index >= processo.getTamanho() - 1 && !gate)
+                return (i - index);
+            else if (memoria[i] == '_' && gate) {
+                index++;
+                gate = false;
+            } else if (memoria[i] == '_' && !gate)
+                index++;
+            else if (memoria[i] != '_' && !gate) {
+                index = 0;
+                gate = true;
             }
-            System.out.println();
-            System.out.println();
+        }
+        return -1; // Não tem um bloco grande o suficiente para alocar, tentar realizar compactação
+    }
+
+    public static void imprimir (char[] memoria){
+        for (int i = 0; i < MEMORY_SIZE; i++) {
+            if (memoria[i] != '_'){
+                if (memoria[i] == '['){
+                    System.out.print(cores[colorGetIndex].getValor());
+                    System.out.print(memoria[i]);
+                }else if (memoria[i] == ']'){
+                    System.out.print(memoria[i]);
+                    incrementarColor();
+                    System.out.print(Cores.RESET.getValor());
+                }
+                else
+                    System.out.print(memoria[i]);
+            }else
+            System.out.print(memoria[i]);
+        }
+
+        colorGetIndex = 0;
+        logMemory(memoria);
+        System.out.println("\n\n");
+    }
+
+    public static void imprimir2 ( char[] memoria){
+        //TODO Concertar impressões de caracteres fora do array de memória
+        //TODO CONCERTAR ESSA PORRA DESSAS CORES
+        int swapColor = 0;
+        for (int i = 0; i < MEMORY_SIZE; i++) {
+            if (memoria[i] != '_') {
+                System.out.print(cores[colorGetIndex].getValor());
+                while (memoria[i] != '_') {
+                    if (memoria[i] == '[' || memoria[i] == ']')
+                        swapColor++;
+                    if (swapColor >= 2) {
+//                        colorGetIndex++;
+                        incrementarColor();
+                        swapColor = 0;
+
+                    }
+                    System.out.print(memoria[i++]);
+                    System.out.print(cores[(colorGetIndex)].getValor());
+                }
+                System.out.print(Cores.RESET.getValor());
+//                colorGetIndex++;
+                incrementarColor();
+            } else
+                System.out.print(memoria[i]);
+        }
+        System.out.println();
+        System.out.println();
+        colorGetIndex = 0;
+    }
+
+    public static void incrementarColor () {
+        if (colorGetIndex > 6) {
             colorGetIndex = 0;
         }
-
-        public static void incrementarColor () {
-            if (colorGetIndex > 6) {
-                colorGetIndex = 0;
-            }
-            colorGetIndex++;
-        }
-
+        colorGetIndex++;
     }
+
+}
