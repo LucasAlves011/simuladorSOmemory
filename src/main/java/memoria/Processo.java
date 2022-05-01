@@ -1,3 +1,5 @@
+package memoria;
+
 public class Processo {
 
     public static int idGeral = 64;
@@ -6,7 +8,6 @@ public class Processo {
     private int id;
     private String nome;
     private int tamanho;
-    private int cor;
 
     public Processo() {
         this.id = ++idGeral;
@@ -16,16 +17,6 @@ public class Processo {
         this.id = ++idGeral;
         this.nome = nome;
         this.tamanho = tamanho;
-        this.cor = (indice2++) % 8;
-    }
-
-
-    public int getCor() {
-        return cor;
-    }
-
-    public void setCor(int cor) {
-        this.cor = cor;
     }
 
     public int getId() {
@@ -54,7 +45,7 @@ public class Processo {
 
     @Override
     public String toString() {
-        return "Processo{ " +
+        return "memoria.Processo{ " +
                 "id=" + id +
                 ", nome='" + nome + '\'' +
                 ", tamanho=" + tamanho +

@@ -1,3 +1,5 @@
+package memoria;
+
 import java.util.Random;
 
 public class Main {
@@ -6,7 +8,7 @@ public class Main {
     public static boolean SWAP = true;
     public static char[] swap = new char[MEMORY_SIZE];
 
-    public static Cores[] cores = new Cores[]{Cores.PRETO, Cores.VERMELHO, Cores.VERDE,
+    public static final Cores[] cores = new Cores[]{Cores.PRETO, Cores.VERMELHO, Cores.VERDE,
             Cores.AMARELO, Cores.AZUL, Cores.ROXO, Cores.CIANO, Cores.BRANCO};
     public static int colorGetIndex = 0;
 
@@ -18,31 +20,25 @@ public class Main {
             swap[i] = '_';
         }
 
-        var p1 = new Processo("Processo 1", 7);//A
-        var p2 = new Processo("Processo 2", 16);//B
-        var p3 = new Processo("Processo 3", 20);//C
-        var p4 = new Processo("Processo 4", 3);//D
-        var p5 = new Processo("Processo 5",29);//E
-        var p6 = new Processo("Processo 6" ,7);//F
-        var p7 = new Processo("Processo 7", 27);//G
-        var p8 = new Processo("Processo 8",19);//H
-        var p9 = new Processo("Processo 9",19);//H
-        var p10 = new Processo("Processo 10",19);//H
-        var p11 = new Processo("Processo 10",19);//H
-        var p12 = new Processo("Processo 10",19);//H
-        var p13 = new Processo("Processo 10",19);//H
-        var p14 = new Processo("Processo 10",19);//H
-        var p15 = new Processo("Processo 10",19);//H
+        var p1 = new Processo("memoria.Processo 1", 7);//A
+        var p2 = new Processo("memoria.Processo 2", 16);//B
+        var p3 = new Processo("memoria.Processo 3", 20);//C
+        var p4 = new Processo("memoria.Processo 4", 3);//D
+        var p5 = new Processo("memoria.Processo 5",29);//E
+        var p6 = new Processo("memoria.Processo 6" ,7);//F
+        var p7 = new Processo("memoria.Processo 7", 27);//G
+        var p8 = new Processo("memoria.Processo 8",19);//H
+        var p9 = new Processo("memoria.Processo 9",19);//I
+        var p10 = new Processo("memoria.Processo 10",19);//J
+        var p11 = new Processo("memoria.Processo 10",19);//K
+        var p12 = new Processo("memoria.Processo 10",19);//L
+
+        imprimir(memoria);
 
         inserir(memoria, 15, 44, '%');//usado apenas para teste
         inserir(memoria, 74, 84, '#');//usado apenas para teste
         inserir(memoria, 132, 138, '@');//usado apenas para teste
 
-        /*imprimir(memoria);
-        desalocar(memoria,swap);
-        imprimir(memoria);
-        imprimir(swap);
-*/
 
         imprimir(memoria);
         alocar(memoria, p1);
@@ -64,20 +60,22 @@ public class Main {
 
         imprimir(memoria);
         alocar(memoria, p7);
+
         imprimir(memoria);
         alocar(memoria, p8);
+
         imprimir(memoria);
         alocar(memoria, p9);
+
         imprimir(memoria);
         alocar(memoria, p10);
+
         imprimir(memoria);
         alocar(memoria, p11);
+
         imprimir(memoria);
         alocar(memoria, p12);
-        imprimir(memoria);
-        alocar(memoria, p13);
-        imprimir(memoria);
-        alocar(memoria, p14);
+
         imprimir(memoria);
 
     }
@@ -212,8 +210,6 @@ public class Main {
         char[] vetorAux;
         int index = 0;
         int number = random.nextInt(MEMORY_SIZE);
-//        int number = 15; //[
-//        int number = 44; //]
 
         int temp = 0;
         int vFinal = 0;
@@ -249,7 +245,7 @@ public class Main {
 
                 }catch (ArrayIndexOutOfBoundsException e) {
                     System.err.println("Aconteceu uma desgraça, até o swap ta cheio meu amigo COMPRE UMA MEMÓRIA" +
-                            "URGENTEMENTE PQ TA FODA PRA KRLLL");
+                            "URGENTEMENTE PQ TA COMPLICADO PRA KCT");
                 }
                 break;
 
@@ -273,8 +269,10 @@ public class Main {
                 try{
                     int swapPosition = returnSwapPosition();
                     if (swapPosition != -1)
-                        for (int i = 0; i < vetorAux.length; i++)
-                            swap[swapPosition++] = vetorAux[index++];
+                        for (int i = vetorAux.length-1; i >= 0; i--)
+                            swap[swapPosition++] = vetorAux[i];
+//                    for (int i = 0;i < vetorAux.length ; i++)
+//                        swap[swapPosition++] = vetorAux[index++];
                     else
                         throw new ArrayIndexOutOfBoundsException();
 
@@ -353,6 +351,28 @@ public class Main {
         return -1; // Não tem um bloco grande o suficiente para alocar, tentar realizar compactação
     }
 
+    public static int externalFragmentation(char[] memoria){
+       int exFrag = 0;
+        for (int i = 0; i < MEMORY_SIZE; i++) {
+            if (memoria[i] == '_')
+                exFrag++;
+        }
+        for (int i = MEMORY_SIZE - 1;  i > 0 ; i--)
+            if (memoria[i] != '_')
+                break;
+            else
+             exFrag--;
+
+        return exFrag;
+    }
+
+    public static void incrementarColor () {
+        if (colorGetIndex > 6) {
+            colorGetIndex = 0;
+        }
+        colorGetIndex++;
+    }
+
     public static void imprimir (char[] memoria){
         for (int i = 0; i < MEMORY_SIZE; i++) {
             if (memoria[i] != '_'){
@@ -373,28 +393,6 @@ public class Main {
         colorGetIndex = 0;
         logMemory(memoria);
         System.out.println("\n\n");
-    }
-
-    public static void incrementarColor () {
-        if (colorGetIndex > 6) {
-            colorGetIndex = 0;
-        }
-        colorGetIndex++;
-    }
-    
-    public static int externalFragmentation(char[] memoria){
-       int exFrag = 0;
-        for (int i = 0; i < MEMORY_SIZE; i++) {
-            if (memoria[i] == '_')
-                exFrag++;
-        }
-        for (int i = MEMORY_SIZE - 1;  i > 0 ; i--)
-            if (memoria[i] != '_')
-                break;
-            else
-             exFrag--;
-
-        return exFrag;
     }
 
 }
