@@ -1,51 +1,176 @@
 package arquivo;
 
 import memoria.Cores;
+import mylibraries.Colors;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Random;
+import java.util.Scanner;
 
 public class MainArquivo {
-    private static ArrayList<Arquivo> controle = new ArrayList<>();
+    public static ArrayList<Arquivo> controleArquivo = new ArrayList<>();
+    public static ArrayList<Diretorio> controleDiretorio = new ArrayList<>();
     public static final int MEMORY_SIZE = 256;
     public static final int BLOCK_SIZE = 4;
-    public static int[][] tabela = new int[256][2];
+    public static int[][] MEMORY = new int[MEMORY_SIZE][2];
 
-
-//    public static final Cores[] cores = new Cores[]{Cores.PRETO, Cores.VERMELHO, Cores.VERDE,
-//            Cores.AMARELO, Cores.AZUL, Cores.ROXO, Cores.CIANO, Cores.BRANCO};
     public static Random random = new Random();
+    public static Scanner entrada = new Scanner(System.in);
 
     public static void main(String[] args) {
-       /* tabela[0][0] = 1;
-        tabela[0][1] = 1;
-        tabela[1][0] = 1;
-        tabela[1][1] = 1;
-        tabela[2][0] = 1;
-        tabela[2][1] = 1;
-        tabela[3][0] = 1;
-        tabela[3][1] = 1;
 
-        tabela[4][0] = 1;
-        tabela[4][1] = 1;
-        tabela[5][0] = 1;
-        tabela[5][1] = 0;
-        tabela[6][0] = 1;
-        tabela[6][1] = 0;
-        tabela[7][0] = 1;
-        tabela[7][1] = 0;
+        Diretorio diretorio = new Diretorio("//");
+        Diretorio diretorio1 = new Diretorio("nome",diretorio);
+        Diretorio diretorio2 = new Diretorio("cadeia",diretorio1);
+        Arquivo x1 = new Arquivo(diretorio,"arq1",10);
+        Arquivo x2 = new Arquivo(diretorio2,"arq2",15);
+        Arquivo x3 = new Arquivo(diretorio,"arq3",12);
+        Arquivo x4 = new Arquivo(diretorio1,"arq4",13);
+        Arquivo x5 = new Arquivo(diretorio1,"arq5",8);
 
-        for (int i = 0; i < 256; i++) {
-            System.out.print(tabela[i][0]);
-        }
-        System.out.println();
-        for (int i = 0; i < 256; i++) {
-            System.out.print(tabela[i][1]);
-        }*/
+       /* diretorio.deleteDiretorio(x2);
+        diretorio.deleteDiretorio(x3);*/
+        alocar(x1);
+        alocar(x2);
+        alocar(x3);
+        alocar(x4);
+        imprimir();
+        deletarArquivo(x2);
+        imprimir();
+        Arquivo x6 = new Arquivo(diretorio,"arq6",23);
+        Arquivo x7 = new Arquivo(diretorio1,"arq7", 17);
+        Arquivo x8 = new Arquivo(diretorio2,"arq8",37);
 
-        Arquivo x = new Arquivo();
-        Arquivo x1 = new Arquivo();
-        Arquivo x2 = new Arquivo();
-        Arquivo x3 = new Arquivo();
+        alocar(x6);
+        alocar(x7);
+        alocar(x8);
+
+        imprimir();
+
+        deletarArquivo(x7);
+        dir(diretorio);
+
+        Arquivo x9 = new Arquivo(diretorio2,"arq9",45);
+        alocar(x9);
+        alocar(x5);
+
+        imprimir();
     }
+
+    public static void alocar(Arquivo arquivo){
+        int celulas =(int) Math.ceil((double) arquivo.getTamanho()/ (double)BLOCK_SIZE) ;
+        int indexFreeInicio =0;
+//        boolean gate = false;
+
+        indexFreeInicio = findIndex(celulas,0);
+
+        int j = 0;
+        for (int i = 0; i < (celulas*4); i++) {
+            MEMORY[indexFreeInicio+ i][0] = arquivo.getId();
+            if(j < arquivo.getTamanho()) {
+                MEMORY[indexFreeInicio+ i][1] = 1;
+                j++;
+            }
+            else
+                MEMORY[indexFreeInicio+ i][1] = 0;
+        }
+    }
+
+    public static void imprimir(){
+        //memoria
+        for (int i = 0; i < MEMORY_SIZE ; i++) {
+            if (i % BLOCK_SIZE ==0 )
+                System.out.print(" ");
+            if (MEMORY[i][0] == 0)
+                System.out.print(Colors.RESET+MEMORY[i][0]);
+            else {
+                if (Objects.equals(findColor(MEMORY[i][0]), Cores.PRETO))
+                    System.out.print(Colors.WHITE_BRIGHT);
+                System.out.print(findColor(MEMORY[i][0]).getValor() + MEMORY[i][0]);
+            }
+        }
+
+
+        System.out.println();
+
+        //bit de alocação
+        for (int i = 0; i < MEMORY_SIZE ; i++) {
+            if (i % BLOCK_SIZE ==0 )
+                System.out.print(" ");
+            if (MEMORY[i][1] == 1)
+                System.out.print(Colors.GREEN);
+            else if (MEMORY[i][1] == 0 && MEMORY[i][0] != 0 )
+                System.out.print(Colors.RED);
+            else
+                System.out.print(Colors.RESET);
+            System.out.print(MEMORY[i][1]);
+        }
+
+        System.out.println("\n");
+        fragIntExt();
+    }
+
+    public static void deletarArquivo(Arquivo arquivo){
+        for (int i = 0; i < MEMORY_SIZE; i++) {
+            if (MEMORY[i][0] == arquivo.getId()) {
+                MEMORY[i][0] = 0;
+                MEMORY[i][1] = 0;
+            }
+        }
+        arquivo.getPai().deleteDiretorio(arquivo);
+    }
+
+    public static void dir(Diretorio diretorio){
+        System.out.print("Arquivos do diretório: " + diretorio.getNome() + "        Tamanho: " + diretorio.getTamanho()+ "        Arquivos: \n") ;
+        System.out.println(diretorio.getArquivos() + "\n");
+    }
+    
+    public static void fragIntExt(){
+        int exFrag = 0;
+        int intFrag = 0;
+        for (int i = 0; i < MEMORY_SIZE; i++)
+            if (MEMORY[i][0] == 0)
+                exFrag++;
+
+        for (int i = MEMORY_SIZE -1 ;  i > 0 ; i--) {
+            if (MEMORY[i][0] == 0)
+                exFrag--;
+            else
+                break;
+        }
+
+        for (int i = 0; i < MEMORY_SIZE; i++) {
+            if (MEMORY[i][0] != 0 && MEMORY[i][1] == 0)
+                intFrag++;
+        }
+
+        System.out.println("Fragmentação Externa : "+exFrag+ " ou "+ (double)exFrag/BLOCK_SIZE+" BLOCOS "+"     " + " Fragmentação Interna : " + intFrag +" ou " + (double)intFrag/BLOCK_SIZE+" BLOCOS \n");
+    }
+
+    public static Cores findColor(int id){
+        for (Arquivo x: controleArquivo) {
+            if (x.getId() == id)
+                return x.getColor();
+        }
+        return Cores.VERMELHO;
+    }
+
+    public static int findIndex(int tamanho, int start){
+        int tempIndex = start ;
+        for (int i = tempIndex; i < MEMORY_SIZE; i+=4) {
+            if(MEMORY[i][0] == 0) {
+                tempIndex = i;
+                break;
+            }
+        }
+
+        for (int i = tempIndex; i <= (tamanho*4) + tempIndex ; i+=4) {
+            if (MEMORY[i][0] != 0)
+               return findIndex(tamanho,i);
+        }
+        return tempIndex;
+    }
+
+
 }
