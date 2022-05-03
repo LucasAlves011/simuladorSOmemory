@@ -3,9 +3,8 @@ package arquivo;
 import lombok.Data;
 import memoria.Cores;
 
-import static arquivo.MainArquivo.controleArquivo;
+import static arquivo.MainArquivo.*;
 import static memoria.Main.cores;
-import static arquivo.MainArquivo.random;
 
 public @Data class Arquivo {
 
@@ -37,6 +36,7 @@ public @Data class Arquivo {
             pai.getArquivos().add(this);
             pai.setTamanho(pai.getTamanho() + tamanho);
             controleArquivo.add(this);
+            alocar(this);
         }
         else
             System.err.println("Não foi possivel criar um Arquivo, nome já utiilizado !!");
@@ -47,7 +47,7 @@ public @Data class Arquivo {
     }
 
     public String toString(){
-        return "\n Nome: " + nome + "  Tamanho: " + tamanho ;
+        return "\n\tNome: " + nome + "  Tamanho: " + tamanho;
     }
 
 }

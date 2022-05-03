@@ -6,7 +6,6 @@ import mylibraries.Colors;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Random;
-import java.util.Scanner;
 
 public class MainArquivo {
     public static ArrayList<Arquivo> controleArquivo = new ArrayList<>();
@@ -16,52 +15,50 @@ public class MainArquivo {
     public static int[][] MEMORY = new int[MEMORY_SIZE][2];
 
     public static Random random = new Random();
-    public static Scanner entrada = new Scanner(System.in);
 
     public static void main(String[] args) {
 
-        Diretorio diretorio = new Diretorio("//");
-        Diretorio diretorio1 = new Diretorio("nome",diretorio);
-        Diretorio diretorio2 = new Diretorio("cadeia",diretorio1);
-        Arquivo x1 = new Arquivo(diretorio,"arq1",10);
-        Arquivo x2 = new Arquivo(diretorio2,"arq2",15);
-        Arquivo x3 = new Arquivo(diretorio,"arq3",12);
-        Arquivo x4 = new Arquivo(diretorio1,"arq4",13);
-        Arquivo x5 = new Arquivo(diretorio1,"arq5",8);
+        Diretorio raiz = new Diretorio("/");
+        Diretorio documentos = new Diretorio("documentos",raiz);
+        Diretorio planilhas = new Diretorio("planilhas",documentos);
+        Diretorio fotos = new Diretorio("fotos",raiz);
 
-       /* diretorio.deleteDiretorio(x2);
-        diretorio.deleteDiretorio(x3);*/
-        alocar(x1);
-        alocar(x2);
-        alocar(x3);
-        alocar(x4);
-        imprimir();
-        deletarArquivo(x2);
-        imprimir();
-        Arquivo x6 = new Arquivo(diretorio,"arq6",23);
-        Arquivo x7 = new Arquivo(diretorio1,"arq7", 17);
-        Arquivo x8 = new Arquivo(diretorio2,"arq8",37);
+        Arquivo x1 = new Arquivo(raiz,"arquivoConfig.txt",10);
+        Arquivo x2 = new Arquivo(fotos,"foto de Casamento",15);
+        Arquivo x3 = new Arquivo(raiz,"sistemConfig",12);
+        Arquivo x4 = new Arquivo(documentos,"relatório de Fim de Período",13);
+        Arquivo x5 = new Arquivo(planilhas,"planilha",8);
 
-        alocar(x6);
-        alocar(x7);
-        alocar(x8);
+        imprimir();
+        listarDiretorio(fotos); //função que lista os arquivos dentro do diretório
+        deletarArquivo(x2); // deleta arquivo
+        imprimir();
+
+        Arquivo x6 = new Arquivo(raiz,"temp",23);
+        Arquivo x7 = new Arquivo(documentos,"Paradigmas.txt", 17);
+        Arquivo x8 = new Arquivo(fotos,"printScreen",37);
 
         imprimir();
 
         deletarArquivo(x7);
-        dir(diretorio);
 
-        Arquivo x9 = new Arquivo(diretorio2,"arq9",45);
-        alocar(x9);
-        alocar(x5);
+        Arquivo x9 = new Arquivo(fotos,"arq9",7);
 
         imprimir();
+
+        documentos.deletarRecursivamente(); // deleta recursivamente todos os arquivos e diretórios
+
+        listarDiretorio(raiz);
+
+        imprimir();
+
+        System.out.println(raiz);
+
     }
 
     public static void alocar(Arquivo arquivo){
         int celulas =(int) Math.ceil((double) arquivo.getTamanho()/ (double)BLOCK_SIZE) ;
-        int indexFreeInicio =0;
-//        boolean gate = false;
+        int indexFreeInicio;
 
         indexFreeInicio = findIndex(celulas,0);
 
@@ -118,10 +115,10 @@ public class MainArquivo {
                 MEMORY[i][1] = 0;
             }
         }
-        arquivo.getPai().deleteDiretorio(arquivo);
+        arquivo.getPai().deleteFile(arquivo);
     }
 
-    public static void dir(Diretorio diretorio){
+    public static void listarDiretorio(Diretorio diretorio){
         System.out.print("Arquivos do diretório: " + diretorio.getNome() + "        Tamanho: " + diretorio.getTamanho()+ "        Arquivos: \n") ;
         System.out.println(diretorio.getArquivos() + "\n");
     }
@@ -171,6 +168,5 @@ public class MainArquivo {
         }
         return tempIndex;
     }
-
 
 }
