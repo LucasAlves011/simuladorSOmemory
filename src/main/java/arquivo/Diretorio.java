@@ -14,7 +14,7 @@ public @Data class Diretorio {
     private Diretorio pai;
     private String nome;
     private int tamanho;
-    private StringBuilder caminho = new StringBuilder();
+
     public Diretorio(String nome) {
         if (!MainArquivo.controleDiretorio.stream().map(Diretorio::getNome).toList().contains(nome)){
             arquivos = new ArrayList<>();
