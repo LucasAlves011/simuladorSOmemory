@@ -8,10 +8,10 @@ public class Main {
     public static boolean SWAP = true;
     public static char[] swap = new char[MEMORY_SIZE];
 
-    public static final Cores[] cores = new Cores[]{Cores.PRETO, Cores.VERMELHO, Cores.VERDE,
-            Cores.AMARELO, Cores.AZUL, Cores.ROXO, Cores.CIANO, Cores.BRANCO};
     public static int colorGetIndex = 0;
 
+    public static final Cores[] cores = new Cores[]{Cores.PRETO, Cores.VERMELHO, Cores.VERDE,
+            Cores.AMARELO, Cores.AZUL, Cores.ROXO, Cores.CIANO, Cores.BRANCO};
     public static void main(String[] args) {
         char[] memoria = new char[MEMORY_SIZE];
 
